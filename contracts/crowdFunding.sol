@@ -2,59 +2,52 @@
 pragma solidity ^0.8.24;
 
 contract crowdFunding {
-    uint256 public  NEEDDONATIONS=10 ether;
-    uint256 public totalDonationAmount=0 ether;
-    mapping (address=>uint256) public donations;
+    uint256 public maxDonation = 10 ether;
+    uint256 public totalDonationAmount = 0 ether;
+    mapping(address => uint256) public donations;
     address public owner;
 
     constructor() {
-        owner=msg.sender;
+        owner = msg.sender;
     }
 
-    //Donate fund with condition donationAmount+totalDonationAmount<=NEEDDONATION
-    function donate(uint256 donationAmount) external payable{
-        if(totalDonationAmount>=NEEDDONATIONS){
-            return ;
+    //Donate fund with condition donationAmount+totalDonationAmount<=maxDonation
+    function donate(uint256 donationAmount) external payable returns (uint256) {
+        if (totalDonationAmount >= maxDonation) {
+            return 0;
+        } else {
+            require(address(this).balance >= msg.value, "Insufficient amount");
+            require(
+                msg.value + totalDonationAmount <= maxDonation,
+                "Donate limit reached"
+            );
+            donations[msg.sender] += donationAmount;
+            // payable (msg.sender).transfer(donationAmount);
+            totalDonationAmount += donationAmount;
+            return donationAmount;
         }
-        require(address(this).balance>=msg.value,"Insufficient amount");
-        require(msg.value+totalDonationAmount<=NEEDDONATIONS,"Donate limit reached");
-        donations[msg.sender] += donationAmount;
-        // payable (msg.sender).transfer(donationAmount);
-        totalDonationAmount+=donationAmount;
-        
-
     }
 
-//     function donate() external payable {
-//     require(totalDonationAmount < NEEDDONATIONS, "Donation Goal reached");
-//     require(totalDonationAmount + msg.value <= NEEDDONATIONS, "Exceeds goal");
-
-//     // effects
-//     donations[msg.sender] += msg.value;
-//     totalDonationAmount   += msg.value;
-
-//     // interactions: none (we keep the donation)
-// }
-
-    
     //Check total donations
-    function totalFund() public onlyOwner view returns (uint256)   {
+    function totalFund() public view returns (uint256) {
         return totalDonationAmount;
     }
 
     //Withdrawl fund
-    function withdrawl(uint256 donationAmount ) public onlyOwner returns (uint256){
-        require(totalDonationAmount>donationAmount,"Insufficient amount to withdrawl");
+    function withdrawl(uint256 donationAmount) public payable returns (uint256) {
+        require(
+            totalDonationAmount > donationAmount,
+            "Insufficient amount to withdrawl"
+        );
         donations[msg.sender] -= donationAmount;
-        payable (msg.sender).transfer(donationAmount); 
-        
-        return totalDonationAmount-=donationAmount;  
+        payable(msg.sender).transfer(donationAmount);
+
+        return totalDonationAmount -= donationAmount;
     }
 
-
-     /* ---------------- modifier ---------------- */
+    /* ---------------- modifier ---------------- */
     modifier onlyOwner() {
-        require(msg.sender == owner, "Unauthorized operaton");
+        require(msg.sender == owner, "Unauthorized operation");
         _;
     }
 }
