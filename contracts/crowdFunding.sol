@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 contract crowdFunding {
-    uint256 public constant NEEDDONATIONS=10 ether;
+    uint256 public  NEEDDONATIONS=10 ether;
     uint256 public totalDonationAmount=0 ether;
     mapping (address=>uint256) public donations;
     address public owner;
