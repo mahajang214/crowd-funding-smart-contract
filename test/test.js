@@ -10,7 +10,8 @@ describe("crowdFunding", () => {
 
     const ContractFactory = await ethers.getContractFactory("crowdFunding");
     contract = await ContractFactory.deploy();
-    await contract.deployed(); // Wait until it's mined
+    // await contract.deployed(); // Wait until it's mined
+    await contract.waitForDeployment();     
   });
 
   it("Should set the right owner", async () => {
